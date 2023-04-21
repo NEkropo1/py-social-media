@@ -42,8 +42,19 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
+    follow = models.ManyToManyField("self", symmetrical=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+
+    def save(self, *args, **kwargs):
+        if self.follower == self.followed:
+            raise ValueError("A user cannot follow themselves.")
+        super().save(*args, **kwargs)
