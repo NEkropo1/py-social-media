@@ -50,7 +50,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "social_media_api.urls"
+ROOT_URLCONF = "social_media_core.urls"
 
 TEMPLATES = [
     {
@@ -123,4 +123,4 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "social_media.User"
