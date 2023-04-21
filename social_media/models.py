@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 
@@ -51,10 +53,41 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
-    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
-    followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+    follower = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="following"
+    )
+    followed = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="followers"
+    )
 
     def save(self, *args, **kwargs):
         if self.follower == self.followed:
             raise ValueError("A user cannot follow themselves.")
         super().save(*args, **kwargs)
+
+
+class Post(models.Model):
+    message = models.TextField()
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="posts"
+    )
+
+    def __str__(self) -> str:
+        return self.message
+
+    def hashtags(self) -> list[str]:
+        """
+        finds all hashtags and parses them,
+        returns list with all hashtags
+        """
+        pattern = re.compile(r"#\w+")
+
+        matches = pattern.findall(self.message)
+        hashtags = [match[1:] for match in matches]
+        return hashtags
