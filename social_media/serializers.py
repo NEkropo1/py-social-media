@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from social_media.models import Post
+from social_media.models import Post, PostImage
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -76,10 +76,16 @@ class UserDetailSerializer(BaseUserSerializer):
         )
 
 
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ("id", "image")
+
+
 class PostListSerializer(serializers.ModelSerializer):
     owner_email = serializers.ReadOnlyField(source="owner.email")
     hashtags = serializers.SerializerMethodField()
-    images = serializers.ImageField()
+    images = PostImageSerializer(many=True)
 
     class Meta:
         model = Post
