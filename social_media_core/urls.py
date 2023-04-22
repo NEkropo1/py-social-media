@@ -26,7 +26,7 @@ urlpatterns = [
         "api/",
         include("social_media.urls", namespace="api")
     ),
-    path("users", include("user.urls", namespace="users"))
+    path("users/", include("user.urls", namespace="users"))
 
 ]
 
