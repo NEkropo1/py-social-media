@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets, mixins, generics
+from requests import Response
+from rest_framework import viewsets, mixins, generics, status
+from rest_framework.decorators import action
 
 from social_media.models import Post, User
 from .serializers import (
@@ -8,17 +10,11 @@ from .serializers import (
     UserDetailSerializer,
     PostListSerializer,
     UserFollowingSerializer,
-    UserFollowedSerializer,
+    UserFollowedSerializer, PostImageUploadSerializer,
 )
 
 
-class UserViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet,
-):
+class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be
     viewed, created, updated, or deleted.
@@ -47,6 +43,23 @@ class PostListView(generics.CreateAPIView, generics.ListAPIView):
     """
     queryset = Post.objects.all()
     serializer_class = PostListSerializer
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="upload-image",
+        # permission_classes=[IsAdminUser],
+    )
+    def upload_image(self, request, pk=None):
+        """API endpoint for uploading image to specific post"""
+        post = self.get_object()
+        serializer = PostImageUploadSerializer(data=request.data, context={"post": post})
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserFollowingView(generics.ListAPIView):

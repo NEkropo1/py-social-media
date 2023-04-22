@@ -1,4 +1,7 @@
+import uuid
+
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework import serializers
 
 from social_media.models import Post, PostImage
@@ -53,6 +56,28 @@ class UserSerializer(BaseUserSerializer):
             "posts", "following", "followers"
         )
 
+    @transaction.atomic
+    def create(self, validated_data):
+        following = validated_data.pop("following", [])
+        followers = validated_data.pop("followers", [])
+        posts = validated_data.pop("posts", [])
+        user = super().create(validated_data)
+        user.following.set(following)
+        user.followers.set(followers)
+        user.posts.set(posts)
+        return user
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        following = validated_data.pop("following", [])
+        followers = validated_data.pop("followers", [])
+        posts = validated_data.pop("posts", [])
+        user = super().create(validated_data)
+        user.following.set(following)
+        user.followers.set(followers)
+        user.posts.set(posts)
+        return user
+
 
 class UserListSerializer(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
@@ -63,12 +88,8 @@ class UserDetailSerializer(BaseUserSerializer):
     posts = serializers.HyperlinkedRelatedField(
         many=True, read_only=True, view_name="post-detail"
     )
-    following = serializers.HyperlinkedRelatedField(
-        many=True, read_only=True, view_name="user-detail"
-    )
-    followers = serializers.HyperlinkedRelatedField(
-        many=True, read_only=True, view_name="user-detail"
-    )
+    following = UserSerializer(many=True, read_only=True)
+    followers = UserSerializer(many=True, read_only=True)
 
     class Meta(BaseUserSerializer.Meta):
         fields = BaseUserSerializer.Meta.fields + (
@@ -76,23 +97,58 @@ class UserDetailSerializer(BaseUserSerializer):
         )
 
 
-class PostImageSerializer(serializers.ModelSerializer):
+class PostImageUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostImage
-        fields = ("id", "image")
+        fields = ("image", "title")
+
+    def create(self, validated_data):
+        post = self.context["post"]
+        image = validated_data["image"]
+        title = image.name
+        post_image = PostImage.objects.create(
+            post=post,
+            image=image,
+            title=title
+        )
+        return post_image
 
 
 class PostListSerializer(serializers.ModelSerializer):
     owner_email = serializers.ReadOnlyField(source="owner.email")
     hashtags = serializers.SerializerMethodField()
-    images = PostImageSerializer(many=True)
+    image = serializers.SerializerMethodField()
+
+    image_upload = serializers.ImageField(
+        allow_empty_file=True,
+        allow_null=True,
+        write_only=True,
+    )
 
     class Meta:
         model = Post
-        fields = ("id", "message", "owner_email", "hashtags", "images")
+        fields = ("id", "message", "owner_email", "hashtags", "image", "image_upload")
 
     def get_hashtags(self, obj):
         return obj.hashtags()
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if obj.Images.exists():
+            image = obj.Images.first()
+            return request.build_absolute_uri(image.image.url)
+        return None
+
+    def create(self, validated_data):
+        image = validated_data.pop("image_upload", None)  # Use the new field for uploading images
+        owner_id = self.context["request"].user.id
+        post = Post.objects.create(owner_id=owner_id, **validated_data)
+
+        if image:
+            title = f"{post.id}-{uuid.uuid4()}"
+            PostImage.objects.create(image=image, title=title, post=post)
+
+        return post
 
 
 class UserFollowingSerializer(serializers.ModelSerializer):

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_drf_filepond",
     "debug_toolbar",
     "social_media",
     "rest_framework",
@@ -129,3 +130,17 @@ MEDIA_URL = "/media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "social_media.User"
+
+# SIMPLE_JWT = {
+#     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+#     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+#     "ROTATE_REFRESH_TOKENS": False,
+# }
+
+DJANGO_DRF_FILEPOND_UPLOAD_TMP = os.path.join(
+    BASE_DIR, "filepond-temp-uploads"
+)
+
+DJANGO_DRF_FILEPOND_FILE_STORE_PATH = os.path.join(
+    BASE_DIR, "filepond-eternal-uploads"
+)
