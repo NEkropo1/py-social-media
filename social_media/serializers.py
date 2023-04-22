@@ -12,18 +12,6 @@ class PostImageUploadSerializer(serializers.ModelSerializer):
         model = PostImage
         fields = ("image", "title")
 
-    @transaction.atomic
-    def create(self, validated_data):
-        post = self.context["post"]
-        image = validated_data["image"]
-        title = image.name
-        post_image = PostImage.objects.create(
-            post=post,
-            image=image,
-            title=title
-        )
-        return post_image
-
 
 class PostListSerializer(serializers.ModelSerializer):
     owner_email = serializers.ReadOnlyField(source="owner.email")
@@ -40,17 +28,22 @@ class PostListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = (
-            "id",
             "owner_email",
             "hashtags",
             "message_short",
+            "message",
             "message_link",
             "image",
-            "image_upload",
+            "image_upload"
         )
+        extra_kwargs = {"message": {"write_only": True, "min_length": 1}}
 
     def get_hashtags(self, obj):
         return obj.hashtags()
+
+    def get_message_link(self, obj):
+        request = self.context.get("request")
+        return request.build_absolute_uri(reverse("api:post-detail", args=[obj.id]))
 
     def get_image(self, obj):
         request = self.context.get("request")
@@ -59,11 +52,6 @@ class PostListSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(image.image.url)
         return None
 
-    def get_message_link(self, obj):
-        request = self.context.get("request")
-        return request.build_absolute_uri(reverse("api:post-detail", args=[obj.id]))
-
-    @transaction.atomic
     def create(self, validated_data):
         image = validated_data.pop("image_upload", None)
         owner_id = self.context["request"].user.id
@@ -83,9 +71,12 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        exclude = ("id",)
-        read_only_fields = ("owner_email", "hashtags", "owner",)
-
+        fields = (
+            "hashtags",
+            "message",
+            "owner_email",
+            "image",
+        )
     def get_hashtags(self, obj):
         return obj.hashtags()
 
