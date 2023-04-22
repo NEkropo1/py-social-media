@@ -2,7 +2,7 @@ from rest_framework import generics
 
 from social_media.models import Post
 from .serializers import (
-    PostListSerializer, PostDetailSerializer,
+    PostListSerializer, PostDetailSerializer
 )
 
 

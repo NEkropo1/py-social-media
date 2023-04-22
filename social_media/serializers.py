@@ -52,6 +52,7 @@ class PostListSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(image.image.url)
         return None
 
+    @transaction.atomic
     def create(self, validated_data):
         image = validated_data.pop("image_upload", None)
         owner_id = self.context["request"].user.id
@@ -77,6 +78,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "owner_email",
             "image",
         )
+
     def get_hashtags(self, obj):
         return obj.hashtags()
 
