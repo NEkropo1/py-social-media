@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_drf_filepond",
     "debug_toolbar",
+    "user",
     "social_media",
     "rest_framework",
 ]
@@ -129,7 +130,7 @@ MEDIA_URL = "/media/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "social_media.User"
+AUTH_USER_MODEL = "user.User"
 
 # SIMPLE_JWT = {
 #     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),

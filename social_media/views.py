@@ -1,40 +1,11 @@
-from django.contrib.auth import get_user_model
 from requests import Response
-from rest_framework import viewsets, mixins, generics, status
+from rest_framework import generics, status
 from rest_framework.decorators import action
 
-from social_media.models import Post, User
+from social_media.models import Post
 from .serializers import (
-    UserSerializer,
-    UserListSerializer,
-    UserDetailSerializer,
-    PostListSerializer,
-    UserFollowingSerializer,
-    UserFollowedSerializer, PostImageUploadSerializer,
+    PostImageUploadSerializer, PostListSerializer, PostDetailSerializer,
 )
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be
-    viewed, created, updated, or deleted.
-    """
-    def get_serializer_class(self):
-        if self.action == "list":
-            return UserListSerializer
-        elif self.action == "retrieve":
-            return UserDetailSerializer
-        else:
-            return UserSerializer
-
-    def get_queryset(self):
-        queryset = get_user_model().objects.all()
-        if self.action == "list":
-            return queryset.prefetch_related("followers", "following", "posts")
-        elif self.action == "retrieve":
-            return queryset.prefetch_related("followers", "following", "posts")
-        else:
-            return UserSerializer
 
 
 class PostListView(generics.CreateAPIView, generics.ListAPIView):
@@ -62,23 +33,9 @@ class PostListView(generics.CreateAPIView, generics.ListAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserFollowingView(generics.ListAPIView):
+class PostDetailView(generics.RetrieveUpdateAPIView):
     """
-    API endpoint that allows users to see who they are following.
+    API endpoint that allows a post to be retrieved.
     """
-    serializer_class = UserFollowingSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        return user.following.all()
-
-
-class UserFollowedView(generics.ListAPIView):
-    """
-    API endpoint that allows users to see who is following them.
-    """
-    serializer_class = UserFollowedSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        return user.followers.all()
+    queryset = Post.objects.all()
+    serializer_class = PostDetailSerializer
