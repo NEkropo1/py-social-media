@@ -67,6 +67,10 @@ class User(AbstractUser):
     def __str__(self) -> str:
         return self.email
 
+    @property
+    def followers_count(self):
+        return self.followers.count()
+
 
 class Follow(models.Model):
     follower = models.ForeignKey(

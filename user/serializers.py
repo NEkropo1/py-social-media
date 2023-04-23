@@ -29,6 +29,27 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class ProfileListSerializer(UserSerializer):
+    profile_detail_link = serializers.HyperlinkedIdentityField(
+        view_name="users:profile_update",
+        lookup_field="pk"
+    )
+    followers_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = (
+            "id",
+            "email",
+            "followers_count",
+            "first_name",
+            "last_name",
+            "bio",
+            "image",
+            "profile_detail_link",
+        )
+
+
 class ProfileDetailUpdateDeleteSerializer(UserSerializer):
     password = serializers.CharField(write_only=True, required=False)
 
@@ -38,7 +59,9 @@ class ProfileDetailUpdateDeleteSerializer(UserSerializer):
             "first_name",
             "last_name",
             "bio",
-            "image"
+            "image",
+            "following",
+            "followers",
         ))
         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
 

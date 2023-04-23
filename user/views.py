@@ -5,12 +5,12 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
-from rest_framework_simplejwt.tokens import RefreshToken
 
-from user.permissions import IsAdminOrOwnerOrIfAuthenticatedReadOnly
+from user.permissions import IsAdminOrOwnerOrIfAuthenticatedReadOnly, IsAdminOrIfAuthenticatedReadOnly
 from user.serializers import (
     UserSerializer,
     ProfileDetailUpdateDeleteSerializer,
+    ProfileListSerializer,
 )
 
 
@@ -40,6 +40,12 @@ class LogoutView(APIView):
             t, _ = BlacklistedToken.objects.get_or_create(token=token)
 
         return Response(status=status.HTTP_205_RESET_CONTENT)
+
+
+class ProfileList(generics.ListCreateAPIView):
+    queryset = get_user_model().objects.all()
+    serializer_class = ProfileListSerializer
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
 
 
 class ProfileDetailUpdateDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):

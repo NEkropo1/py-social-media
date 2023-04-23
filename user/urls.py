@@ -9,7 +9,7 @@ from user.views import (
     CreateUserView,
     ManageUserView,
     ProfileDetailUpdateDeleteAPIView,
-    LogoutView,
+    LogoutView, ProfileList,
 )
 
 urlpatterns = [
@@ -19,6 +19,7 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("me/", ManageUserView.as_view(), name="manage"),
+    path("profiles/", ProfileList.as_view(), name="profile_list"),
     path(
         "profiles/<int:pk>/",
         ProfileDetailUpdateDeleteAPIView.as_view(),
