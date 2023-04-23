@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_drf_filepond",
+    "drf_spectacular",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "debug_toolbar",
@@ -142,17 +143,30 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
+DJANGO_DRF_FILEPOND_FILE_STORE_PATH = os.path.join(
+    BASE_DIR, "filepond-eternal-uploads"
+)
+
 DJANGO_DRF_FILEPOND_UPLOAD_TMP = os.path.join(
     BASE_DIR, "filepond-temp-uploads"
 )
 
 REST_FRAMEWORK = {
-    # "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
 
-DJANGO_DRF_FILEPOND_FILE_STORE_PATH = os.path.join(
-    BASE_DIR, "filepond-eternal-uploads"
-)
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Social Media API",
+    "DESCRIPTION": "Profiles, approved by Zucc",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "defaultModelRendering": "model",
+        "defaultModelExpandDepth": 2,
+        "defaultModelsExpandDepth": 2,
+    }
+}

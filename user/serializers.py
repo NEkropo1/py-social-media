@@ -82,25 +82,6 @@ class ProfileDetailUpdateDeleteSerializer(UserSerializer):
         return user
 
 
-# class FollowUnfollowSerializer(serializers.Serializer):
-#     user_id = serializers.IntegerField()
-#
-#     def validate_user_id(self, value):
-#         user_model = get_user_model()
-#         try:
-#             user = user_model.objects.get(id=value)
-#         except user_model.DoesNotExist:
-#             raise serializers.ValidationError("User does not exist")
-#         return user.id
-#
-#     def save(self, **kwargs):
-#         request = self.context.get("request")
-#         followed_user = self.context.get("followed_user")
-#         following_user = request.user
-#
-#         followed_user.follow_unfollow_user(following_user)
-#
-#         return followed_user
 class FollowUnfollowSerializer(serializers.Serializer):
     def save(self, **kwargs):
         request = self.context.get("request")
