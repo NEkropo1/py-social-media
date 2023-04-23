@@ -7,9 +7,11 @@ from rest_framework_simplejwt.views import (
 
 from user.views import (
     CreateUserView,
-    ManageUserView,
+    FollowUnfollowAPIView,
+    ProfileList,
     ProfileDetailUpdateDeleteAPIView,
-    LogoutView, ProfileList,
+    LogoutView,
+    ManageUserView,
 )
 
 urlpatterns = [
@@ -23,7 +25,12 @@ urlpatterns = [
     path(
         "profiles/<int:pk>/",
         ProfileDetailUpdateDeleteAPIView.as_view(),
-        name="profile_update"
+        name="profile_detail"
+    ),
+    path(
+        "profiles/<int:pk>/follow/",
+        FollowUnfollowAPIView.as_view(),
+        name="follow"
     ),
 ]
 

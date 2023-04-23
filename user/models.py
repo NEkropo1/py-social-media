@@ -1,9 +1,10 @@
 import os
 import uuid
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
@@ -53,7 +54,16 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
     bio = models.TextField(null=True, blank=True)
-    follow = models.ManyToManyField("self", symmetrical=False)
+    following = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        related_name="user_followers",
+    )
+    followers = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        related_name="user_following",
+    )
     image = models.ImageField(null=True, upload_to=profile_image_file_path)
 
     USERNAME_FIELD = "email"
@@ -68,23 +78,25 @@ class User(AbstractUser):
         return self.email
 
     @property
-    def followers_count(self):
+    def followers_count(self) -> int:
         return self.followers.count()
 
+    @transaction.atomic
+    def follow_unfollow_user(self, user):
+        """
+        Unfollow the specified user.
+        """
+        print(self, user)
+        if self != user:
+            if self.is_following(user):
+                self.following.remove(user)
+                user.followers.remove(self)
+            else:
+                self.following.add(user)
+                user.followers.add(self)
 
-class Follow(models.Model):
-    follower = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="following"
-    )
-    followed = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="followers"
-    )
-
-    def save(self, *args, **kwargs):
-        if self.follower == self.followed:
-            raise ValueError("A user cannot follow themselves.")
-        super().save(*args, **kwargs)
+    def is_following(self, user):
+        """
+        Check if the user is following the specified user.
+        """
+        return self.following.filter(id=user.id).exists()
