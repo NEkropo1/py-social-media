@@ -39,10 +39,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_drf_filepond",
+    "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "debug_toolbar",
     "user",
     "social_media",
-    "rest_framework",
 ]
 
 MIDDLEWARE = [
@@ -135,9 +136,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "user.User"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 DJANGO_DRF_FILEPOND_UPLOAD_TMP = os.path.join(
@@ -146,11 +148,6 @@ DJANGO_DRF_FILEPOND_UPLOAD_TMP = os.path.join(
 
 REST_FRAMEWORK = {
     # "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    # "DEFAULT_THROTTLE_CLASSES": [
-    #     "rest_framework.throttling.AnonRateThrottle",
-    #     "rest_framework.throttling.UserRateThrottle",
-    # ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "10/day", "user": "30/day"},
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),

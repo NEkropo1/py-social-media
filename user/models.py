@@ -52,6 +52,7 @@ def profile_image_file_path(instance, filename):
 class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
+    bio = models.TextField(null=True, blank=True)
     follow = models.ManyToManyField("self", symmetrical=False)
     image = models.ImageField(null=True, upload_to=profile_image_file_path)
 
@@ -59,6 +60,9 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+    class Meta:
+        ordering = ["email"]
 
     def __str__(self) -> str:
         return self.email
